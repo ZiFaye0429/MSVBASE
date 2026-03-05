@@ -9,8 +9,8 @@ ENV PGDATABASE "" \
     PGUSERNAME "" \
     PGPASSWORD ""
 
-ARG UID=999
-ARG GID=999
+ARG UID=1001
+ARG GID=1001
 
 ENV PG_INSTALL_DIR /u01/app/postgres/product/${PG_VERSION}
 
@@ -48,7 +48,7 @@ RUN apt-get update && \
 	apt-get install -y --no-install-recommends wget git golang-go  swig vim\
     libboost-filesystem-dev libboost-test-dev libboost-serialization-dev libboost-regex-dev libboost-serialization-dev libboost-regex-dev libboost-thread-dev libboost-system-dev
 
-RUN wget "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz" --no-check-certificate -q -O - \
+RUN wget "https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.gz" --no-check-certificate -q -O - \
         | tar -xz && \
         cd boost_1_81_0 && \
         ./bootstrap.sh && \
@@ -90,10 +90,10 @@ RUN mkdir /u01/ \
     && chown -R postgres:postgres "$PGDATA" \
     && chmod 700 "$PGDATA" 
 
-COPY ./thirdparty/Postgres /home/postgres/src/
-RUN echo "this line could be executed for a very long time" && chown -R postgres:postgres /home/postgres/src
+COPY ./thirdparty/Postgres /home/zliuhg/postgres/src/
+RUN echo "this line could be executed for a very long time" && chown -R postgres:postgres /home/zliuhg/postgres/src
     
-RUN cd /home/postgres/src \
+RUN cd /home/zliuhg/postgres/src \
     && su postgres -c "./configure \
     --with-blocksize=32 \
     --enable-integer-datetimes \

@@ -40,6 +40,8 @@ public:
         const void *p_target, const std::string &p_path);
     static hnswlib::QueryResult<float>* GetNet(
         std::shared_ptr<hnswlib::ResultIterator<float>> &resultIterator);
+    static uint64_t GetPointsVisited(
+        std::shared_ptr<hnswlib::ResultIterator<float>> &resultIterator);
     static void EndScan(
         std::shared_ptr<hnswlib::ResultIterator<float>> &resultIterator);
     static bool Insert(const std::string &p_path,

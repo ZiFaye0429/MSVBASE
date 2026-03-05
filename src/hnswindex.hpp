@@ -35,6 +35,8 @@ extern "C"
         bool inRange;
         float range;
         HNSWIndexScan::WorkSpace *workSpace;
+        int64 points_visited;
+        int64 results_returned;
     } HNSWScanOpaqueData;
 
     typedef HNSWScanOpaqueData* HNSWScanOpaque;

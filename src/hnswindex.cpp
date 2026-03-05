@@ -270,8 +270,11 @@ bool hnsw_gettuple(IndexScanDesc scan, ScanDirection dir)
      */
     Assert(ScanDirectionIsForward(dir));
 
+    static int64 total_points_visited_global = 0;
     if (scanState->first)
     {
+       scanState->points_visited = 0;
+       scanState->results_returned = 0;
        scanState->workSpace = new HNSWIndexScan::WorkSpace();
        std::string path = std::string(DataDir) + std::string("/") +
                         std::string(DatabasePath) + std::string("/") +
@@ -316,8 +319,15 @@ bool hnsw_gettuple(IndexScanDesc scan, ScanDirection dir)
 
         if (!result->HasResult())
         {
+            scanState->points_visited =
+                (int64)HNSWIndexScan::GetPointsVisited(scanState->workSpace->resultIterator);
+            total_points_visited_global += scanState->points_visited;
+            elog(LOG, "HNSW_QUERY_END: points_visited=%ld, total_all_queries=%ld",
+                scanState->points_visited,
+                total_points_visited_global);
             return false;
         }
+
         if (scanState->hasRangeFilter)
         {
             if (!scanState->inRange)
@@ -337,6 +347,12 @@ bool hnsw_gettuple(IndexScanDesc scan, ScanDirection dir)
                 }
                 else
                 {
+                    scanState->points_visited =
+                        (int64)HNSWIndexScan::GetPointsVisited(scanState->workSpace->resultIterator);
+                    total_points_visited_global += scanState->points_visited;
+                    elog(LOG, "HNSW_QUERY_EARLY_TERMINATION: points_visited=%ld, reason=queue_full, total_all_queries=%ld",
+                        scanState->points_visited,
+                        total_points_visited_global);
                     return false;
                 }
             }
@@ -345,6 +361,13 @@ bool hnsw_gettuple(IndexScanDesc scan, ScanDirection dir)
                 i++;
                 if (scanState->inRange && i >= distanceThreshold)
                 {
+                    scanState->points_visited =
+                        (int64)HNSWIndexScan::GetPointsVisited(scanState->workSpace->resultIterator);
+                    total_points_visited_global += scanState->points_visited;
+                    elog(LOG, "HNSW_QUERY_EARLY_TERMINATION: points_visited=%ld, reason=distance_threshold=%d, total_all_queries=%ld",
+                        scanState->points_visited,
+                        distanceThreshold,
+                        total_points_visited_global);
                     return false;
                 }
                 else
@@ -384,6 +407,7 @@ bool hnsw_gettuple(IndexScanDesc scan, ScanDirection dir)
         scan->xs_orderbyvals[0] = Float4GetDatum(result->GetDistance());
         scan->xs_orderbynulls[0] = false;
         scan->xs_recheckorderby = false;
+        scanState->results_returned++;
         return true;
     }
 }

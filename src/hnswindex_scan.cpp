@@ -43,6 +43,12 @@ hnswlib::QueryResult<float>* HNSWIndexScan::GetNet(
     return resultIterator->Next();
 }
 
+uint64_t HNSWIndexScan::GetPointsVisited(
+    std::shared_ptr<hnswlib::ResultIterator<float>> &resultIterator)
+{
+    return resultIterator->GetPointsVisited();
+}
+
 void HNSWIndexScan::EndScan(
     std::shared_ptr<hnswlib::ResultIterator<float>> &resultIterator)
 {
